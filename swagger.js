@@ -7,7 +7,7 @@ const doc = {
   },
   //host: 'localhost:8080',
   host: 'https://sanjib-job-portal-api-4qzs.onrender.com/',
-  schemes: ['http'],
+  //schemes: ['http'],
 };
 
 const outputFile = './swagger-output.json';  // Output file path
