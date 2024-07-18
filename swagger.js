@@ -5,7 +5,7 @@ const doc = {
     title: 'Job Portal Application',
     description: 'Node Expressjs Job Portal Application',
   },
-  host: 'localhost:8080',
+  host: 'https://sanjib-job-portal-api-4qzs.onrender.com/',
   schemes: ['http'],
 };
 
