@@ -1,11 +1,14 @@
-import userModel from "../models/userModel.js";
+const userModel = require('../models/userModel'); // Adjust path as necessary
 
-export const updateUserController = async (req, res, next) => {
+const updateUserController = async (req, res, next) => {
   const { name, email, lastName, location } = req.body;
   if (!name || !email || !lastName || !location) {
-    next("Please Provide All Fields");
+    return next("Please Provide All Fields");
   }
   const user = await userModel.findOne({ _id: req.user.userId });
+  if (!user) {
+    return next("User Not Found");
+  }
   user.name = name;
   user.lastName = lastName;
   user.email = email;
@@ -18,3 +21,5 @@ export const updateUserController = async (req, res, next) => {
     token,
   });
 };
+
+module.exports = { updateUserController };

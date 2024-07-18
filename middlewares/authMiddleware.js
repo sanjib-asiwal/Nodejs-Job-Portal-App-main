@@ -1,9 +1,9 @@
-import JWT from "jsonwebtoken";
+const JWT = require('jsonwebtoken');
 
 const userAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer")) {
-    next("Auth Failed");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next(new Error("Auth Failed"));
   }
   const token = authHeader.split(" ")[1];
   try {
@@ -11,8 +11,8 @@ const userAuth = async (req, res, next) => {
     req.user = { userId: payload.userId };
     next();
   } catch (error) {
-    next("Auth Failed");
+    return next(new Error("Auth Failed"));
   }
 };
 
-export default userAuth;
+module.exports = userAuth;

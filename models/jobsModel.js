@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema(
   {
     company: {
       type: String,
-      requied: [true, "Companay name is require"],
+      required: [true, "Company name is required"], // Fixed typo
     },
     position: {
       type: String,
-      required: [true, "Job Position is required"],
+      required: [true, "Job position is required"], // Fixed typo
       maxlength: 100,
     },
     status: {
@@ -18,7 +18,7 @@ const jobSchema = new mongoose.Schema(
     },
     workType: {
       type: String,
-      enum: ["full-time", "part-time", "internship", "contaract"],
+      enum: ["full-time", "part-time", "internship", "contract"], // Fixed typo
       default: "full-time",
     },
     workLocation: {
@@ -34,4 +34,4 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Job", jobSchema);
+module.exports = mongoose.model('Job', jobSchema);

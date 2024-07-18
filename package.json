@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "job portal project",
   "main": "serevr.js",
-  "type": "module",
+  "type": "commonjs",
+  
+
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js"
@@ -26,6 +28,7 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.22",
     "server": "^1.0.39",
+    "swagger-autogen": "^2.23.7",
     "swagger-doc": "^0.3.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",

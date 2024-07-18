@@ -1,11 +1,12 @@
-import jobsModel from "../models/jobsModel.js";
-import mongoose from "mongoose";
-import moment from "moment";
+const jobsModel = require('../models/jobsModel'); // Adjust path if necessary
+const mongoose = require('mongoose');
+const moment = require('moment');
+
 // ====== CREATE JOB ======
-export const createJobController = async (req, res, next) => {
+const createJobController = async (req, res, next) => {
   const { company, position } = req.body;
   if (!company || !position) {
-    next("Please Provide All Fields");
+    return next("Please Provide All Fields");
   }
   req.body.createdBy = req.user.userId;
   const job = await jobsModel.create(req.body);
@@ -13,13 +14,13 @@ export const createJobController = async (req, res, next) => {
 };
 
 // ======= GET JOBS ===========
-export const getAllJobsController = async (req, res, next) => {
+const getAllJobsController = async (req, res, next) => {
   const { status, workType, search, sort } = req.query;
-  //conditons for searching filters
+  // conditions for searching filters
   const queryObject = {
     createdBy: req.user.userId,
   };
-  //logic filters
+  // logic filters
   if (status && status !== "all") {
     queryObject.status = status;
   }
@@ -32,7 +33,7 @@ export const getAllJobsController = async (req, res, next) => {
 
   let queryResult = jobsModel.find(queryObject);
 
-  //sorting
+  // sorting
   if (sort === "latest") {
     queryResult = queryResult.sort("-createdAt");
   }
@@ -45,13 +46,13 @@ export const getAllJobsController = async (req, res, next) => {
   if (sort === "z-a") {
     queryResult = queryResult.sort("-position");
   }
-  //pagination
+  // pagination
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
   queryResult = queryResult.skip(skip).limit(limit);
-  //jobs count
+  // jobs count
   const totalJobs = await jobsModel.countDocuments(queryResult);
   const numOfPage = Math.ceil(totalJobs / limit);
 
@@ -66,50 +67,48 @@ export const getAllJobsController = async (req, res, next) => {
 };
 
 // ======= UPDATE JOBS ===========
-export const updateJobController = async (req, res, next) => {
+const updateJobController = async (req, res, next) => {
   const { id } = req.params;
   const { company, position } = req.body;
-  //validation
+  // validation
   if (!company || !position) {
-    next("Please Provide All Fields");
+    return next("Please Provide All Fields");
   }
-  //find job
+  // find job
   const job = await jobsModel.findOne({ _id: id });
-  //validation
+  // validation
   if (!job) {
-    next(`no jobs found with this id ${id}`);
+    return next(`No jobs found with this id ${id}`);
   }
-  if (!req.user.userId === job.createdBy.toString()) {
-    next("Your Not Authorized to update this job");
-    return;
+  if (req.user.userId.toString() !== job.createdBy.toString()) {
+    return next("You are not authorized to update this job");
   }
   const updateJob = await jobsModel.findOneAndUpdate({ _id: id }, req.body, {
     new: true,
     runValidators: true,
   });
-  //res
+  // response
   res.status(200).json({ updateJob });
 };
 
 // ======= DELETE JOBS ===========
-export const deleteJobController = async (req, res, next) => {
+const deleteJobController = async (req, res, next) => {
   const { id } = req.params;
-  //find job
+  // find job
   const job = await jobsModel.findOne({ _id: id });
-  //validation
+  // validation
   if (!job) {
-    next(`No Job Found With This ID ${id}`);
+    return next(`No Job Found With This ID ${id}`);
   }
-  if (!req.user.userId === job.createdBy.toString()) {
-    next("Your Not Authorize to delete this job");
-    return;
+  if (req.user.userId.toString() !== job.createdBy.toString()) {
+    return next("You are not authorized to delete this job");
   }
   await job.deleteOne();
   res.status(200).json({ message: "Success, Job Deleted!" });
 };
 
-// =======  JOBS STATS & FILTERS ===========
-export const jobStatsController = async (req, res) => {
+// ======= JOBS STATS & FILTERS ===========
+const jobStatsController = async (req, res) => {
   const stats = await jobsModel.aggregate([
     // search by user jobs
     {
@@ -125,14 +124,14 @@ export const jobStatsController = async (req, res) => {
     },
   ]);
 
-  //default stats
+  // default stats
   const defaultStats = {
-    pending: stats.pending || 0,
-    reject: stats.reject || 0,
-    interview: stats.interview || 0,
+    pending: stats.find(stat => stat._id === 'pending')?.count || 0,
+    reject: stats.find(stat => stat._id === 'reject')?.count || 0,
+    interview: stats.find(stat => stat._id === 'interview')?.count || 0,
   };
 
-  //monthly yearly stats
+  // monthly yearly stats
   let monthlyApplication = await jobsModel.aggregate([
     {
       $match: {
@@ -164,7 +163,13 @@ export const jobStatsController = async (req, res) => {
       return { date, count };
     })
     .reverse();
-  res
-    .status(200)
-    .json({ totlaJob: stats.length, defaultStats, monthlyApplication });
+  res.status(200).json({ totalJobs: stats.length, defaultStats, monthlyApplication });
+};
+
+module.exports = {
+  createJobController,
+  getAllJobsController,
+  updateJobController,
+  deleteJobController,
+  jobStatsController,
 };

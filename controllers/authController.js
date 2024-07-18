@@ -1,26 +1,27 @@
-import userModel from "../models/userModel.js";
+const userModel = require('../models/userModel');
 
-export const registerController = async (req, res, next) => {
+// ====== REGISTER CONTROLLER ======
+const registerController = async (req, res, next) => {
   const { name, email, password } = req.body;
-  //validate
+  // validate
   if (!name) {
-    next("name is required");
+    return next("name is required");
   }
   if (!email) {
-    next("email is required");
+    return next("email is required");
   }
   if (!password) {
-    next("password is required and greater than 6 character");
+    return next("password is required and greater than 6 characters");
   }
-  const exisitingUser = await userModel.findOne({ email });
-  if (exisitingUser) {
-    next("Email Already Register Please Login");
+  const existingUser = await userModel.findOne({ email });
+  if (existingUser) {
+    return next("Email Already Registered. Please Login");
   }
   const user = await userModel.create({ name, email, password });
-  //token
+  // token
   const token = user.createJWT();
   res.status(201).send({
-    sucess: true,
+    success: true,
     message: "User Created Successfully",
     user: {
       name: user.name,
@@ -32,28 +33,31 @@ export const registerController = async (req, res, next) => {
   });
 };
 
-export const loginController = async (req, res, next) => {
+// ====== LOGIN CONTROLLER ======
+const loginController = async (req, res, next) => {
   const { email, password } = req.body;
-  //validation
+  // validation
   if (!email || !password) {
-    next("Please Provide All Fields");
+    return next("Please Provide All Fields");
   }
-  //find user by email
+  // find user by email
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) {
-    next("Invalid Useraname or password");
+    return next("Invalid Username or password");
   }
-  //compare password
+  // compare password
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    next("Invalid Useraname or password");
+    return next("Invalid Username or password");
   }
   user.password = undefined;
   const token = user.createJWT();
   res.status(200).json({
     success: true,
-    message: "Login SUccessfully",
+    message: "Login Successfully",
     user,
     token,
   });
 };
+
+module.exports = { registerController, loginController };

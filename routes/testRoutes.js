@@ -1,12 +1,12 @@
-import express from "express";
-import { testPostController } from "../controllers/testController.js";
-import userAuth from "../middelwares/authMiddleware.js";
+const express = require('express');
+const { testPostController } = require('../controllers/testController');
+const userAuth = require('../middlewares/authMiddleware.js');
 
-//router object
+// Router object
 const router = express.Router();
 
-//routes
-router.post("/test-post", userAuth, testPostController);
+// Routes
+router.post('/test-post', userAuth, testPostController);
 
-//export
-export default router;
+// Export
+module.exports = router;
